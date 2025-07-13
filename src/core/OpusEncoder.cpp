@@ -8,6 +8,7 @@
 #include <QFileInfo>
 #include <atomic>
 #include <cstring>
+#include <cmath>
 #include <algorithm>
 #include <random>
 
@@ -557,34 +558,39 @@ void OpusEncoderImpl::createOpusComment(unsigned char *comment, int &commentSize
 
 std::vector<float> OpusEncoderImpl::resampleAudio(const std::vector<float> &input, int inputSampleRate, int outputSampleRate, int channels)
 {
-    // Simple linear interpolation resampler
-    // TODO: Implement a proper resampler (e.g., using libsamplerate or speex resampler)
+    // High-quality resampling using libsamplerate (Secret Rabbit Code)
+    
+    if (inputSampleRate == outputSampleRate) {
+        // No resampling needed
+        return input;
+    }
     
     double ratio = static_cast<double>(outputSampleRate) / inputSampleRate;
-    size_t inputSamples = input.size() / channels;
-    size_t outputSamples = static_cast<size_t>(inputSamples * ratio);
+    size_t inputFrames = input.size() / channels;
+    size_t outputFrames = static_cast<size_t>(std::ceil(inputFrames * ratio));
     
-    std::vector<float> output(outputSamples * channels);
+    std::vector<float> output(outputFrames * channels);
     
-    for (size_t outSample = 0; outSample < outputSamples; outSample++) {
-        double inSamplePos = outSample / ratio;
-        size_t inSample = static_cast<size_t>(inSamplePos);
-        double fraction = inSamplePos - inSample;
-        
-        if (inSample + 1 < inputSamples) {
-            // Linear interpolation between two samples
-            for (int ch = 0; ch < channels; ch++) {
-                float sample1 = input[inSample * channels + ch];
-                float sample2 = input[(inSample + 1) * channels + ch];
-                output[outSample * channels + ch] = sample1 + (sample2 - sample1) * fraction;
-            }
-        } else {
-            // Use last sample
-            for (int ch = 0; ch < channels; ch++) {
-                output[outSample * channels + ch] = input[(inputSamples - 1) * channels + ch];
-            }
-        }
+    // Set up the sample rate conversion
+    SRC_DATA srcData;
+    srcData.data_in = const_cast<float*>(input.data());
+    srcData.data_out = output.data();
+    srcData.input_frames = inputFrames;
+    srcData.output_frames = outputFrames;
+    srcData.src_ratio = ratio;
+    srcData.end_of_input = 1; // We're converting the entire buffer at once
+    
+    // Use the highest quality sinc interpolation
+    int error = src_simple(&srcData, SRC_SINC_BEST_QUALITY, channels);
+    
+    if (error != 0) {
+        m_lastError = QString("Resampling failed: %1").arg(src_strerror(error));
+        qDebug() << m_lastError;
+        return input; // Return original on error
     }
+    
+    // Resize output to actual frames generated
+    output.resize(srcData.output_frames_gen * channels);
     
     return output;
 }

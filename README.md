@@ -12,11 +12,13 @@ A modern Qt6/QML desktop application for batch converting FLAC audio files to Op
 
 - Batch conversion of FLAC files to Opus format
 - Uses libopus reference implementation for best quality
+- High-quality audio resampling using libsamplerate (Secret Rabbit Code)
 - Preserves all metadata including album art
 - Maintains directory structure
 - Multi-threaded conversion with progress tracking
 - Configurable encoding parameters (bitrate, complexity, VBR)
 - Modern Qt6/QML user interface
+- Proper Ogg Opus container format output
 
 ## Dependencies
 
@@ -24,6 +26,8 @@ A modern Qt6/QML desktop application for batch converting FLAC audio files to Op
 - Qt6 (>= 6.5) with Quick and Concurrent modules
 - libopus (reference implementation)
 - libFLAC++ (for FLAC decoding)
+- libsamplerate (for high-quality audio resampling)
+- libogg (for Ogg container format)
 - TagLib (for metadata handling)
 - CMake (>= 3.16)
 - C++17 compiler
@@ -35,7 +39,8 @@ A modern Qt6/QML desktop application for batch converting FLAC audio files to Op
 sudo apt update
 sudo apt install build-essential cmake qt6-base-dev qt6-declarative-dev \
                  libqt6quick6 libqt6quickcontrols2-6 libqt6concurrent6 \
-                 libopus-dev libflac++-dev libtag1-dev pkg-config
+                 libopus-dev libflac++-dev libogg-dev libsamplerate0-dev \
+                 libtag1-dev pkg-config
 ```
 
 #### Fedora
@@ -145,6 +150,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Qt framework](https://www.qt.io/) by The Qt Company
 - [TagLib](https://taglib.org/) audio metadata library
 - [FLAC](https://xiph.org/flac/) by Xiph.Org Foundation
+- [libsamplerate](http://www.mega-nerd.com/SRC/) Sample Rate Converter
 
 ## Contributing
 

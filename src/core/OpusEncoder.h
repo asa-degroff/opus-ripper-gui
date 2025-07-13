@@ -8,6 +8,7 @@
 #include <vector>
 #include <cstdint>
 #include <atomic>
+#include <samplerate.h>
 
 // Forward declarations for opus types
 struct OpusEncoder;

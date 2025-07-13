@@ -14,6 +14,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(OPUS REQUIRED opus)
 pkg_check_modules(OGG REQUIRED ogg)
 pkg_check_modules(FLAC REQUIRED flac++)
+pkg_check_modules(SAMPLERATE REQUIRED samplerate)
 find_package(Threads REQUIRED)
 
 # Try to find TagLib
@@ -70,6 +71,7 @@ target_include_directories(OpusRipperCore PUBLIC
     ${OPUS_INCLUDE_DIRS}
     ${OGG_INCLUDE_DIRS}
     ${FLAC_INCLUDE_DIRS}
+    ${SAMPLERATE_INCLUDE_DIRS}
     ${TAGLIB_INCLUDE_DIR}
 )
 
@@ -80,6 +82,7 @@ target_link_libraries(OpusRipperCore PUBLIC
     ${OPUS_LIBRARIES}
     ${OGG_LIBRARIES}
     ${FLAC_LIBRARIES}
+    ${SAMPLERATE_LIBRARIES}
     ${TAGLIB_LIBRARY}
     Threads::Threads
 )
