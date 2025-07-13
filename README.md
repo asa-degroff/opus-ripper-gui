@@ -124,16 +124,16 @@ This is the initial project structure with stub implementations. The following c
 
 ## Current Status
 
-This project is in active development. The core functionality is implemented but some features are still being worked on:
+This project is in active development. The following core functionality is implemented:
 
 - ✅ FLAC decoding
 - ✅ Opus encoding using libopus reference implementation  
 - ✅ Directory structure preservation
 - ✅ Multi-threaded batch conversion
 - ✅ Progress tracking
-- ⚠️  Basic metadata copying (full Ogg Opus metadata support in progress)
-- ⚠️  Simple Opus format output (proper Ogg container support in progress)
-- ❌ Album art preservation (planned)
+- ✅ Metadata copying
+- ✅ Ogg Opus container format output
+- ✅ Album art preservation
 
 ## License
 
