@@ -42,12 +42,14 @@ void FileScanner::stopScanning()
 
 void FileScanner::scanDirectoryRecursive(const QString &directory, const QString &baseDirectory)
 {
-    QDirIterator it(directory, m_flacExtensions, QDir::Files, QDirIterator::Subdirectories);
+    QDirIterator it(directory, QDir::Files, QDirIterator::Subdirectories);
     
     int filesFound = 0;
+    int totalFilesChecked = 0;
     while (it.hasNext() && !m_shouldStop) {
         it.next();
         QFileInfo fileInfo = it.fileInfo();
+        totalFilesChecked++;
         
         if (isFlacFile(fileInfo)) {
             ScannedFile file;
@@ -78,7 +80,14 @@ void FileScanner::scanDirectoryRecursive(const QString &directory, const QString
 bool FileScanner::isFlacFile(const QFileInfo &fileInfo) const
 {
     QString suffix = fileInfo.suffix().toLower();
-    return m_flacExtensions.contains("." + suffix);
+    
+    // Check if the suffix matches (without the dot since suffix() returns without dot)
+    for (const QString &ext : m_flacExtensions) {
+        if (ext == "." + suffix) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // FileScannerWorker implementation
