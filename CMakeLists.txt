@@ -25,8 +25,8 @@ endif()
 
 qt_standard_project_setup(REQUIRES 6.5)
 
-# Set Qt policy for QML directories
-qt_policy(SET QTP0004 NEW)
+# Set Qt policy for QML directories (this causes issues)
+# qt_policy(SET QTP0004 NEW)
 
 # Add executable
 qt_add_executable(opus-ripper-gui
