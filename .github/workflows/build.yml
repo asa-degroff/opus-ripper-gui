@@ -25,6 +25,8 @@ jobs:
         sudo apt-get install -y \
           libopus-dev \
           libflac++-dev \
+          libogg-dev \
+          libsamplerate0-dev \
           libtag1-dev \
           pkg-config
     
