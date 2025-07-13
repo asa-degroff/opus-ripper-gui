@@ -7,6 +7,7 @@
 #include <QFileInfo>
 #include <QDateTime>
 #include <QThread>
+#include <QMutex>
 #include <atomic>
 
 struct ScannedFile {
@@ -27,7 +28,10 @@ public:
     void scanDirectory(const QString &directory);
     void stopScanning();
     
-    QList<ScannedFile> getScannedFiles() const { return m_scannedFiles; }
+    QList<ScannedFile> getScannedFiles() const { 
+        QMutexLocker locker(&m_mutex);
+        return m_scannedFiles; 
+    }
     int getFileCount() const { return m_scannedFiles.size(); }
     qint64 getTotalSize() const { return m_totalSize; }
     bool isScanning() const { return m_isScanning; }
@@ -49,6 +53,7 @@ private:
     qint64 m_totalSize = 0;
     std::atomic<bool> m_isScanning{false};
     std::atomic<bool> m_shouldStop{false};
+    mutable QMutex m_mutex;
     
     // File extensions to scan
     const QStringList m_flacExtensions = {".flac", ".fla"};

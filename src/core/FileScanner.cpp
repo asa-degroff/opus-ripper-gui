@@ -3,6 +3,8 @@
 #include <QDirIterator>
 #include <QThread>
 #include <QDebug>
+#include <QCoreApplication>
+#include <QMutexLocker>
 
 FileScanner::FileScanner(QObject *parent)
     : QObject(parent)
@@ -17,6 +19,7 @@ void FileScanner::scanDirectory(const QString &directory)
         return;
     }
     
+    QMutexLocker locker(&m_mutex);
     m_scannedFiles.clear();
     m_totalSize = 0;
     m_shouldStop = false;
@@ -58,14 +61,23 @@ void FileScanner::scanDirectoryRecursive(const QString &directory, const QString
             file.size = fileInfo.size();
             file.lastModified = fileInfo.lastModified();
             
-            m_scannedFiles.append(file);
-            m_totalSize += file.size;
+            {
+                QMutexLocker locker(&m_mutex);
+                m_scannedFiles.append(file);
+                m_totalSize += file.size;
+            }
             filesFound++;
             
             emit fileFound(file.absolutePath);
             
+            // Emit progress more frequently for large directories
             if (filesFound % 10 == 0) {
                 emit scanProgress(filesFound, m_totalSize);
+            }
+            
+            // Process events periodically to keep UI responsive
+            if (filesFound % 100 == 0) {
+                QCoreApplication::processEvents();
             }
         }
     }
@@ -73,7 +85,14 @@ void FileScanner::scanDirectoryRecursive(const QString &directory, const QString
     m_isScanning = false;
     
     if (!m_shouldStop) {
-        emit scanCompleted(m_scannedFiles.size(), m_totalSize);
+        int totalFiles;
+        qint64 totalSize;
+        {
+            QMutexLocker locker(&m_mutex);
+            totalFiles = m_scannedFiles.size();
+            totalSize = m_totalSize;
+        }
+        emit scanCompleted(totalFiles, totalSize);
     }
 }
 

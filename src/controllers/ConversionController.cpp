@@ -7,6 +7,7 @@
 #include <QFileInfo>
 #include <QRunnable>
 #include <QDebug>
+#include <QCoreApplication>
 
 class ConversionRunnable : public QRunnable
 {
@@ -227,20 +228,33 @@ void ConversionController::onScanCompleted(int totalFiles, qint64 totalSize)
     m_isScanning = false;
     m_filesFound = totalFiles;
     
-    // Add scanned files to conversion model
-    QList<ConversionItem> items;
-    for (const auto &scannedFile : m_fileScanner->getScannedFiles()) {
-        ConversionItem item;
-        item.inputPath = scannedFile.absolutePath;
-        item.relativePath = scannedFile.relativePath;
-        item.fileName = QFileInfo(scannedFile.absolutePath).fileName();
-        item.fileSize = scannedFile.size;
-        item.outputPath = generateOutputPath(item.inputPath, item.relativePath);
-        
-        items.append(item);
-    }
+    // Add scanned files to conversion model in batches to avoid UI freeze
+    const int batchSize = 100;
+    const auto &scannedFiles = m_fileScanner->getScannedFiles();
     
-    m_conversionModel->addFiles(items);
+    for (int i = 0; i < scannedFiles.size(); i += batchSize) {
+        QList<ConversionItem> batch;
+        int end = qMin(i + batchSize, scannedFiles.size());
+        
+        for (int j = i; j < end; ++j) {
+            const auto &scannedFile = scannedFiles[j];
+            ConversionItem item;
+            item.inputPath = scannedFile.absolutePath;
+            item.relativePath = scannedFile.relativePath;
+            item.fileName = QFileInfo(scannedFile.absolutePath).fileName();
+            item.fileSize = scannedFile.size;
+            item.outputPath = generateOutputPath(item.inputPath, item.relativePath);
+            
+            batch.append(item);
+        }
+        
+        m_conversionModel->addFiles(batch);
+        
+        // Process events to keep UI responsive
+        if (i % 500 == 0) {
+            QCoreApplication::processEvents();
+        }
+    }
     
     emit isScanningChanged();
     emit filesFoundChanged();
@@ -287,8 +301,17 @@ void ConversionController::onAllConversionsCompleted()
 void ConversionController::processNextFile()
 {
     
-    // Queue all pending files for conversion
+    // Limit the number of concurrent conversions to avoid overwhelming the system
+    int activeConversions = 0;
     for (int i = 0; i < m_conversionModel->totalFiles(); ++i) {
+        ConversionItem checkItem = m_conversionModel->getItem(i);
+        if (checkItem.status == "converting") {
+            activeConversions++;
+        }
+    }
+    
+    // Queue pending files for conversion up to thread count limit
+    for (int i = 0; i < m_conversionModel->totalFiles() && activeConversions < m_threadCount; ++i) {
         ConversionItem item = m_conversionModel->getItem(i);
         
         if (item.status == "pending") {
@@ -303,6 +326,11 @@ void ConversionController::processNextFile()
                 m_bitrate, m_complexity, m_vbr
             );
             m_threadPool->start(task);
+            
+            activeConversions++;
+            if (activeConversions >= m_threadCount) {
+                break;
+            }
         }
     }
 }
