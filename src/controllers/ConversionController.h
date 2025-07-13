@@ -113,10 +113,12 @@ signals:
     void conversionCompleted();
     void conversionError(const QString &error);
     
-private slots:
+public slots:
     void onScanCompleted(int totalFiles, qint64 totalSize);
     void onFileConverted(const QString &inputFile, const QString &outputFile);
     void onConversionFailed(const QString &inputFile, const QString &error);
+    
+private slots:
     void onAllConversionsCompleted();
     
 private:

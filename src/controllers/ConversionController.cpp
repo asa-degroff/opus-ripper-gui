@@ -27,19 +27,20 @@ public:
     
     void run() override
     {
-        
         // Create converter in the worker thread
         AudioConverter converter;
         converter.setBitrate(m_bitrate);
         converter.setComplexity(m_complexity);
         converter.setVbr(m_vbr);
         
-        // Connect signals using Qt::DirectConnection since we're in the same thread
+        // Connect signals - progress updates
         QObject::connect(&converter, &AudioConverter::conversionProgress,
                         [this](int progress) {
-                            QMetaObject::invokeMethod(m_controller, [this, progress]() {
-                                m_controller->updateFileProgress(m_item.inputPath, progress);
-                            }, Qt::QueuedConnection);
+                            QString path = m_item.inputPath;
+                            QMetaObject::invokeMethod(m_controller, "updateFileProgress", 
+                                                    Qt::QueuedConnection,
+                                                    Q_ARG(QString, path),
+                                                    Q_ARG(int, progress));
                         });
         
         ConversionTask task;
@@ -53,13 +54,21 @@ public:
         
         // Notify completion on the main thread
         QString errorMsg = converter.getLastError();
-        QMetaObject::invokeMethod(m_controller, [this, errorMsg]() {
-            if (errorMsg.isEmpty()) {
-                m_controller->onFileConverted(m_item.inputPath, m_item.outputPath);
-            } else {
-                m_controller->onConversionFailed(m_item.inputPath, errorMsg);
-            }
-        }, Qt::QueuedConnection);
+        QString inputPath = m_item.inputPath;
+        QString outputPath = m_item.outputPath;
+        
+        // Use a more traditional approach to avoid lambda issues
+        if (errorMsg.isEmpty()) {
+            QMetaObject::invokeMethod(m_controller, "onFileConverted", 
+                                    Qt::QueuedConnection,
+                                    Q_ARG(QString, inputPath),
+                                    Q_ARG(QString, outputPath));
+        } else {
+            QMetaObject::invokeMethod(m_controller, "onConversionFailed", 
+                                    Qt::QueuedConnection,
+                                    Q_ARG(QString, inputPath),
+                                    Q_ARG(QString, errorMsg));
+        }
         
     }
     
