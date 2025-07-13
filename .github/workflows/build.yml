@@ -1,0 +1,46 @@
+name: Build
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: '6.5.0'
+        modules: 'qtmultimedia'
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libopus-dev \
+          libflac++-dev \
+          libtag1-dev \
+          pkg-config
+    
+    - name: Configure
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+    
+    - name: Build
+      run: |
+        cd build
+        make -j$(nproc)
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: opus-ripper-gui-linux
+        path: build/opus-ripper-gui

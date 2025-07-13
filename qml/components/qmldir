@@ -1,0 +1,5 @@
+module OpusRipperGUI.Components
+DirectoryPicker 1.0 DirectoryPicker.qml
+ProgressView 1.0 ProgressView.qml
+SettingsPanel 1.0 SettingsPanel.qml
+StyledGroupBox 1.0 StyledGroupBox.qml

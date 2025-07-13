@@ -1,0 +1,134 @@
+# Build directories
+build/
+build-*/
+cmake-build-*/
+out/
+.cache/
+
+# Qt specific
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.moc
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+*.qmlc
+*.jsc
+*.autosave
+*.qm
+*.prl
+
+# Qt Creator
+*.autosave
+*.codekit
+*.swp
+*~.nib
+.qmake.stash
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# CLion
+.idea/
+cmake-build-debug/
+cmake-build-release/
+
+# Compilation outputs
+*.o
+*.obj
+*.so
+*.so.*
+*.dylib
+*.dll
+*.a
+*.lib
+*.exe
+*.out
+*.app
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# OS specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Backup files
+*.bak
+*.tmp
+*.temp
+*~
+
+# Log files
+*.log
+
+# Package files
+*.tar.gz
+*.zip
+*.7z
+*.deb
+*.rpm
+
+# Documentation builds
+doc/html/
+doc/latex/
+Doxyfile.bak
+
+# Test coverage
+*.gcov
+*.gcda
+*.gcno
+coverage/
+htmlcov/
+
+# Python (for any scripts)
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.Python
+venv/
+env/
+
+# Temporary files
+.*.swp
+.*.swo
+*.orig
+
+# IDE project files (additional)
+*.kdevelop4
+.kdev4/
+*.kate-swp
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+_deps/
+compile_commands.json
+.cmake/
+
+# Ninja
+.ninja_deps
+.ninja_log
+build.ninja
+
+# Local configuration
+.env
+.env.local
+config.local.ini
+settings.local.json
