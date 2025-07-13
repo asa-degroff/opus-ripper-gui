@@ -47,13 +47,13 @@ sudo apt install build-essential cmake qt6-base-dev qt6-declarative-dev \
 ```bash
 sudo dnf install cmake gcc-c++ qt6-qtbase-devel qt6-qtdeclarative-devel \
                  qt6-qtquickcontrols2-devel opus-devel flac-devel \
-                 taglib-devel pkg-config
+                 taglib-devel pkg-config libsamplerate-devel
 ```
 
 #### Arch Linux
 ```bash
 sudo pacman -S base-devel cmake qt6-base qt6-declarative qt6-quickcontrols2 \
-               opus flac taglib pkg-config
+               opus flac taglib pkg-config libsamplerate
 ```
 
 ## Building
@@ -102,17 +102,6 @@ Or use the provided run script:
    - Set number of parallel conversions
 5. **Start Conversion**: Click "Start Conversion" to begin
 
-## Development Status
-
-This is the initial project structure with stub implementations. The following components need to be implemented:
-
-### Core Features to Implement
-1. **FLAC Decoding**: Integrate libFLAC++ for reading FLAC audio data
-2. **Opus Encoding**: Implement proper Opus encoding using libopus
-3. **Metadata Handling**: Complete TagLib integration for metadata preservation
-4. **Progress Tracking**: Wire up real-time progress updates
-5. **Error Handling**: Implement robust error handling and recovery
-
 ### Code Structure
 - `src/core/`: Core audio processing components
 - `src/models/`: Data models for file tracking and progress
@@ -120,6 +109,8 @@ This is the initial project structure with stub implementations. The following c
 - `qml/`: User interface components
 
 ## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 1. Fork the repository
 2. Create a feature branch
@@ -151,7 +142,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [TagLib](https://taglib.org/) audio metadata library
 - [FLAC](https://xiph.org/flac/) by Xiph.Org Foundation
 - [libsamplerate](http://www.mega-nerd.com/SRC/) Sample Rate Converter
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
