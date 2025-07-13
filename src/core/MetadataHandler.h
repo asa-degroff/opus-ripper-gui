@@ -15,6 +15,7 @@ namespace TagLib {
         class File;
     }
     namespace Ogg {
+        class XiphComment;
         namespace Opus {
             class File;
         }
@@ -66,7 +67,7 @@ private:
     
     // Helper functions
     bool extractFlacPictures(TagLib::FLAC::File *file, AudioMetadata &metadata);
-    bool embedOpusPicture(TagLib::Ogg::Opus::File *file, const QByteArray &pictureData, const QString &mimeType);
+    bool embedOpusPicture(TagLib::Ogg::XiphComment *xiphComment, const QByteArray &pictureData, const QString &mimeType);
     void copyStandardTags(TagLib::Tag *source, TagLib::Tag *dest);
     void copyVorbisComments(TagLib::FLAC::File *flacFile, TagLib::Ogg::Opus::File *opusFile);
 };
