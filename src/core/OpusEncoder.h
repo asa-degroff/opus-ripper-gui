@@ -65,6 +65,14 @@ private:
     bool writeOpusHeader(QIODevice *device, int sampleRate, int channels);
     bool writeOpusComment(QIODevice *device);
     uint32_t calculateChecksum(const QByteArray &data);
+    
+    // Ogg Opus specific
+    bool writeOggOpusFile(const std::vector<float> &samples, int sampleRate, int channels, const QString &outputPath);
+    void createOpusHeader(unsigned char *header, int &headerSize, int channels, int preskip, int inputSampleRate);
+    void createOpusComment(unsigned char *comment, int &commentSize);
+    
+    // Resampling
+    std::vector<float> resampleAudio(const std::vector<float> &input, int inputSampleRate, int outputSampleRate, int channels);
 };
 
 #endif // OPUSENCODER_H

@@ -45,12 +45,6 @@ bool MetadataHandler::readFlacMetadata(const QString &filePath, AudioMetadata &m
 
 bool MetadataHandler::writeOpusMetadata(const QString &filePath, const AudioMetadata &metadata)
 {
-    // TODO: Implement proper Ogg Opus metadata handling
-    // For now, skip metadata writing for our simple format
-    qDebug() << "Metadata writing not yet implemented for simple Opus format";
-    return true;
-    
-    /*
     TagLib::Ogg::Opus::File file(filePath.toStdString().c_str());
     
     if (!file.isValid()) {
@@ -73,7 +67,6 @@ bool MetadataHandler::writeOpusMetadata(const QString &filePath, const AudioMeta
     // TODO: Embed album art
     
     return file.save();
-    */
 }
 
 bool MetadataHandler::copyMetadata(const QString &flacPath, const QString &opusPath)

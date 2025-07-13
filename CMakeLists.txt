@@ -12,6 +12,7 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets Quick Concurrent QuickCont
 # Find external libraries
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(OPUS REQUIRED opus)
+pkg_check_modules(OGG REQUIRED ogg)
 pkg_check_modules(FLAC REQUIRED flac++)
 find_package(Threads REQUIRED)
 
@@ -67,6 +68,7 @@ add_library(OpusRipperCore STATIC
 target_include_directories(OpusRipperCore PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${OPUS_INCLUDE_DIRS}
+    ${OGG_INCLUDE_DIRS}
     ${FLAC_INCLUDE_DIRS}
     ${TAGLIB_INCLUDE_DIR}
 )
@@ -76,6 +78,7 @@ target_link_libraries(OpusRipperCore PUBLIC
     Qt6::Quick
     Qt6::Concurrent
     ${OPUS_LIBRARIES}
+    ${OGG_LIBRARIES}
     ${FLAC_LIBRARIES}
     ${TAGLIB_LIBRARY}
     Threads::Threads
