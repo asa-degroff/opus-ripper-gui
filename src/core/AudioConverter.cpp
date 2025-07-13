@@ -24,7 +24,8 @@ void AudioConverter::convertFile(const ConversionTask &task)
     
     // Ensure output directory exists
     if (!ensureOutputDirectory(task.outputPath)) {
-        emit conversionFailed(task.inputPath, "Failed to create output directory");
+        m_lastError = "Failed to create output directory";
+        emit conversionFailed(task.inputPath, m_lastError);
         m_isConverting = false;
         return;
     }
@@ -42,10 +43,11 @@ void AudioConverter::convertFile(const ConversionTask &task)
             qDebug() << "Warning: Failed to copy metadata for" << task.inputPath;
         }
         
+        m_lastError.clear();
         emit conversionCompleted(task.inputPath, task.outputPath);
     } else {
-        QString error = m_encoder->getLastError();
-        emit conversionFailed(task.inputPath, error);
+        m_lastError = m_encoder->getLastError();
+        emit conversionFailed(task.inputPath, m_lastError);
     }
     
     // Disconnect progress signals

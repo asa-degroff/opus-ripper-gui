@@ -12,6 +12,7 @@
 
 class FileScanner;
 class AudioConverter;
+class ConversionRunnable;
 
 class ConversionController : public QObject
 {
@@ -88,6 +89,7 @@ public slots:
     void stopConversion();
     void pauseConversion();
     void resumeConversion();
+    void updateFileProgress(const QString &filePath, int progress);
     
 signals:
     void inputDirectoryChanged();
@@ -148,6 +150,8 @@ private:
     void processNextFile();
     QString generateOutputPath(const QString &inputPath, const QString &relativePath);
     bool shouldSkipFile(const QString &outputPath);
+    
+    friend class ConversionRunnable;
 };
 
 #endif // CONVERSIONCONTROLLER_H

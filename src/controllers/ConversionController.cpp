@@ -11,31 +11,65 @@
 class ConversionRunnable : public QRunnable
 {
 public:
-    ConversionRunnable(AudioConverter *converter, const ConversionItem &item, int index, int total)
-        : m_converter(converter)
+    ConversionRunnable(ConversionController *controller, const ConversionItem &item, 
+                      int index, int total, int bitrate, int complexity, bool vbr)
+        : m_controller(controller)
         , m_item(item)
         , m_index(index)
         , m_total(total)
+        , m_bitrate(bitrate)
+        , m_complexity(complexity)
+        , m_vbr(vbr)
     {
         setAutoDelete(true);
     }
     
     void run() override
     {
+        
+        // Create converter in the worker thread
+        AudioConverter converter;
+        converter.setBitrate(m_bitrate);
+        converter.setComplexity(m_complexity);
+        converter.setVbr(m_vbr);
+        
+        // Connect signals using Qt::DirectConnection since we're in the same thread
+        QObject::connect(&converter, &AudioConverter::conversionProgress,
+                        [this](int progress) {
+                            QMetaObject::invokeMethod(m_controller, [this, progress]() {
+                                m_controller->updateFileProgress(m_item.inputPath, progress);
+                            }, Qt::QueuedConnection);
+                        });
+        
         ConversionTask task;
         task.inputPath = m_item.inputPath;
         task.outputPath = m_item.outputPath;
         task.index = m_index;
         task.total = m_total;
         
-        m_converter->convertFile(task);
+        // Perform the conversion
+        converter.convertFile(task);
+        
+        // Notify completion on the main thread
+        QString errorMsg = converter.getLastError();
+        QMetaObject::invokeMethod(m_controller, [this, errorMsg]() {
+            if (errorMsg.isEmpty()) {
+                m_controller->onFileConverted(m_item.inputPath, m_item.outputPath);
+            } else {
+                m_controller->onConversionFailed(m_item.inputPath, errorMsg);
+            }
+        }, Qt::QueuedConnection);
+        
     }
     
 private:
-    AudioConverter *m_converter;
+    ConversionController *m_controller;
     ConversionItem m_item;
     int m_index;
     int m_total;
+    int m_bitrate;
+    int m_complexity;
+    bool m_vbr;
 };
 
 ConversionController::ConversionController(QObject *parent)
@@ -252,38 +286,22 @@ void ConversionController::onAllConversionsCompleted()
 
 void ConversionController::processNextFile()
 {
+    
     // Queue all pending files for conversion
     for (int i = 0; i < m_conversionModel->totalFiles(); ++i) {
         ConversionItem item = m_conversionModel->getItem(i);
+        
         if (item.status == "pending") {
+            
             // Update status to converting
             m_conversionModel->updateFileStatus(item.inputPath, "converting");
             m_progressModel->setCurrentFile(item.inputPath);
             
-            AudioConverter *converter = new AudioConverter();
-            converter->setBitrate(m_bitrate);
-            converter->setComplexity(m_complexity);
-            converter->setVbr(m_vbr);
-            
-            // Connect signals
-            connect(converter, &AudioConverter::conversionStarted,
-                    [this](const QString &file) {
-                        m_progressModel->setCurrentFile(file);
-                    });
-            
-            connect(converter, &AudioConverter::conversionProgress,
-                    [this, item](int progress) {
-                        m_conversionModel->updateFileProgress(item.inputPath, progress);
-                        m_progressModel->updateFileProgress(item.inputPath, progress);
-                    });
-            
-            connect(converter, &AudioConverter::conversionCompleted,
-                    this, &ConversionController::onFileConverted);
-            
-            connect(converter, &AudioConverter::conversionFailed,
-                    this, &ConversionController::onConversionFailed);
-            
-            ConversionRunnable *task = new ConversionRunnable(converter, item, i, m_filesFound);
+            // Create runnable with conversion parameters
+            ConversionRunnable *task = new ConversionRunnable(
+                this, item, i, m_filesFound, 
+                m_bitrate, m_complexity, m_vbr
+            );
             m_threadPool->start(task);
         }
     }
@@ -313,4 +331,10 @@ bool ConversionController::shouldSkipFile(const QString &outputPath)
     }
     
     return QFile::exists(outputPath);
+}
+
+void ConversionController::updateFileProgress(const QString &filePath, int progress)
+{
+    m_conversionModel->updateFileProgress(filePath, progress);
+    m_progressModel->updateFileProgress(filePath, progress);
 }

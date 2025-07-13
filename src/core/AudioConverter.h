@@ -28,6 +28,7 @@ public:
     void convertFile(const ConversionTask &task);
     void stopConversion();
     bool isConverting() const { return m_isConverting; }
+    QString getLastError() const { return m_lastError; }
     
     // Encoding settings
     void setBitrate(int bitrate);
@@ -50,6 +51,7 @@ private:
     int m_bitrate = 128000; // 128 kbps default
     int m_complexity = 10;  // Maximum quality
     bool m_vbr = true;      // Variable bitrate
+    QString m_lastError;
     
     bool ensureOutputDirectory(const QString &outputPath);
     QString generateOutputPath(const QString &inputPath, const QString &outputBase);
